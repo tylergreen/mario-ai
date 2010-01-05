@@ -16,8 +16,10 @@
 (defmacro unless [p & body]
   `(when (not ~p) ~@body))
 
+; runs when trial starts
 (defn -reset [this])
 
+; better way to do this?
 (def toggle (atom true))
 (defn get-toggle []
   (if @toggle
@@ -71,19 +73,3 @@
 
 (defn -getName [this] "Clojure Bot")
   
-; to compile bot:
-; cd ~/cs/myclojure/marioai
-
-; Start clojure with proper classpath
-; java -cp /Users/jorge/cs/marioai/classes:/Users/jorge/cs/clojure/clojure-core/clojure.jar:bin:src clojure.main $1
-
-; (set! *compile-path* "/Users/jorge/cs/clojure/marioai/bin")
-
-; (compile 'bot1)
-
-
-;  To run compiled bot: (in myclojure/marioai)
-; java -cp bin:/Users/jorge/cs/marioai/classes:/Users/jorge/cs/clojure/clojure-core/clojure.jar ch.idsia.scenarios.Play bot1
-
-; Be sure to put CLASSES in cp not SRC!!
-
