@@ -1,75 +1,73 @@
+; Mario AI Bot
+; author: Tyler Green
+; tyler.green2@gmai.com
 (ns bot1
-    (:gen-class
-     :name bot1
-     :implements [ch.idsia.ai.agents.Agent]
-     )
-    (:import 
-     [ch.idsia.ai.agents Agent]
-     [ch.idsia.mario.engine.sprites Mario]
-     [ch.idsia.mario.environments Environment]
-     [ch.idsia.utils MathX])
-    )
+  (:gen-class
+   :name bot1
+   :implements [ch.idsia.ai.agents.Agent]
+   :extends ch.idsia.ai.agents.human.HumanKeyboardAgent
+   )
+  (:import 
+   [ch.idsia.ai.agents.human HumanKeyboardAgent]
+   [ch.idsia.ai.agents Agent]
+   [ch.idsia.mario.engine.sprites Mario]
+   [ch.idsia.mario.environments Environment]
+   [ch.idsia.utils MathX]
+   )
+  (:use :reload-all marioUtils)
+  )
 
-(defmacro defs [& bindings]
-  `(do ~@(map #(cons 'def %) (partition 2 bindings))))
-
-(defmacro unless [p & body]
-  `(when (not ~p) ~@body))
-
-; runs when trial starts
 (defn -reset [this])
 
-; better way to do this?
-(def toggle (atom true))
-(defn get-toggle []
-  (if @toggle
-    (reset! toggle false)
-    (reset! toggle true)))
-
-(def prev-move (atom []))
-
-(defs
-  left   0
-  right  1 
-  down   2
-  jump   3
-  speed  4
-  up     5
-  pause 6 )
-
-(defn press [button controller]
-  (aset controller button true))
-
-(defn release [button controller]
-  (aset controller button false))
-
-(defn pressing? [button controller]
-  (nth @controller button))
+(defn -getName [this] "Clojure Bot")
 
 (defn button-masher [obs]
-  (let [control (make-array (. Boolean TYPE) 5)]
-    (press right control)
-    (when (get-toggle)
+  (let [c (controller)]
+    (press right c)
+    (when (get-toggle)  ; can change this to pressing?
       (do
-	(press speed control)
+	(press speed c)
 	(when (. obs isMarioOnGround)
-	  (press jump control))))
-    control))
+	  (press jump c))))
+    c))
 
-; has completed a whole level! Twice!  Unbelievable
+; can't figure out case statement
+; render the observation in ascii
+(defn pretty [code]
+  (cond (= code (byte 0)) "_"
+	true "|"))
+
+; draw the scene
+(defn print-matrix [matrix ypos]
+  (doseq [[i x] (zipmap (range 0 300 5) matrix)]
+    (do (doseq [[j y] (zipmap (range) x)]
+	  (cond (and (> 5 (- i ypos) 0) (= j 11))
+		(print "M")
+		true (print (pretty y))))
+	(println))))
+
 (defn high-jumper [obs]
-  (let [control (make-array (. Boolean TYPE) 5)]
-    (press right control)
+  (let [c (controller)
+	pos (. obs getMarioFloatPos)]
+    (print-matrix (. obs getLevelSceneObservationZ 0)
+		  (aget pos 1))
+    (println "NEXT")
+    (press right c)
     (when (get-toggle)
-      (press speed control))
-    (unless (and (. obs isMarioOnGround) (pressing? jump prev-move))
-      (press jump control))
-    (reset! prev-move (seq control))
-    control))
+      (press speed c))
+    (unless (and (. obs isMarioOnGround)
+		 (pressing? jump prev-move))
+      (press jump c))
+    (reset! prev-move (seq c))
+    c))
 
-(defn -getAction [this obs]
+(def env (atom nil))
+
+(defn -integrateObservation [this obs]
+  (reset! env obs))
+
+(defn -getAction [this]
 ;  (button-masher obs)
-  (high-jumper obs))
+  (high-jumper @env)
+)
 
-(defn -getName [this] "Clojure Bot")
-  
