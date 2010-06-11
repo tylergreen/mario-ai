@@ -1,0 +1,8 @@
+Clojure implementation of a mario-ai bot.
+
+**TO-DO**
+1) Now that we have observation, we want to figure out where
+ we currently are in that observation
+
+2) Once we know where we are, want to predict where we will be
+

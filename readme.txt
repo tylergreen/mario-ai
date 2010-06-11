@@ -6,7 +6,7 @@ java -cp /Users/jorge/cs/marioai/classes:/Users/jorge/cs/clojure/clojure-core/cl
 
 or run ./mclj
 
-(set! *compile-path* "/Users/jorge/cs/clojure/marioai/bin")
+(set! *compile-path* "path-to-bin/bin")
 
 (compile 'bot1)
 
